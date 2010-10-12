@@ -29,6 +29,7 @@ struct Stage {
   Character pacman;
   Character enemy[13];
   int num_enemy;
+  int num_dot;
 
   int score;
 
@@ -43,12 +44,13 @@ struct Stage {
       for (int x = 0; x < width; ++x, ++m) {
         // Does nothing if it's a wall, dot or road.
         switch (*m) {
-          case '#':
-          case '.':
-          case ' ':
-            continue;
-          default:
-            break;
+        case '.':
+          num_dot++;
+        case '#':
+        case ' ':
+          continue;
+        default:
+          break;
         }
 
         // Keeps a character position.
@@ -61,6 +63,14 @@ struct Stage {
         *m = ' ';
       }
     }
+  }
+
+  void CopyStage(const Stage* src) {
+    char* m = map;
+    memcpy(this, src, sizeof(Stage));
+
+    map = m;
+    memcpy(map, src->map, width * height);
   }
 
   char GetObject(int x, int y) {
@@ -247,11 +257,42 @@ struct Stage {
     return true;
   }
 
+  bool CanPacmanMove(char command) {
+    return
+        (command == '.') ||
+        (command == 'h' && !IsWall(pacman.x - 1, pacman.y)) ||
+        (command == 'l' && !IsWall(pacman.x + 1, pacman.y)) ||
+        (command == 'k' && !IsWall(pacman.x, pacman.y - 1)) ||
+        (command == 'j' && !IsWall(pacman.x, pacman.y + 1));
+  }
+
+  void MovePackman(char command) {
+    pacman.prev_x = pacman.x;
+    pacman.prev_y = pacman.y;
+    switch (command) {
+    case 'h':
+      pacman.x--;
+      break;
+    case 'l':
+      pacman.x++;
+      break;
+    case 'k':
+      pacman.y--;
+      break;
+    case 'j':
+      pacman.y++;
+      break;
+    }
+  }
+
   // Returns true if Pacman is live. Otherwise returns false.
   bool MovePacmanAndEnemy(char command) {
     MoveEnemy();
 
-    // MovePackman();
+    if (!CanPacmanMove(command))
+      return false;
+
+    MovePackman(command);
 
     if (!IsPackmanLive())
       return false;
@@ -332,6 +373,65 @@ const char Stage3::initial_map_[] =
     "#.................##............##..@.##...............R.#"
     "##########################################################";
 
+int Solve_sub(Stage* stage, int stage_size, int time, int depth, int min_score, char* commands) {
+  static const char command[] = {'h', 'j', 'k', 'l', '.'};
+
+  Stage* curr_stage = (Stage*)((char*)stage + time * stage_size);
+  Stage* next_stage = (Stage*)((char*)curr_stage + stage_size);
+
+  int high_score = 0;
+
+  if (curr_stage->score + curr_stage->time_limit - curr_stage->time <= min_score)
+    return high_score;
+
+  for (size_t i = 0; i < sizeof(command) / sizeof(command[0]); ++i) {
+    if (!curr_stage->CanPacmanMove(command[i]))
+      continue;
+
+    commands[time] = command[i];
+    next_stage->CopyStage(curr_stage);
+
+    int score = curr_stage->score;
+    if (next_stage->MovePacmanAndEnemy(command[i]) == true) {
+      score = next_stage->score;
+      if (score == next_stage->num_dot) {
+        // Cleared!
+        score += next_stage->time_limit - next_stage->time;
+        commands[time + 1] = 0;
+        printf("%s - %d\n", commands, score);
+      } else if (next_stage->time < depth) {
+        score = Solve_sub(stage, stage_size, time + 1, depth, min_score, commands);
+      } else {
+        commands[time + 1] = 0;
+        printf("%s - %d\n", commands, score);
+      }
+    }
+    if (score > high_score)
+      high_score = score;
+    if (score > min_score)
+      min_score = score;
+  }
+
+  return high_score;
+}
+
+int Solve(int stage, int depth, char* commands) {
+  int score = 0;
+  if (stage == 1) {
+    Stage1* stage = new Stage1[51];
+    stage[0].InitStage();
+    score = Solve_sub(stage, sizeof(Stage1), 0, depth, 40, commands);
+    delete[] stage;
+  } else if (stage == 2) {
+    Stage2* stage = new Stage2[301];
+    stage[0].InitStage();
+    score = Solve_sub(stage, sizeof(Stage2), 0, depth, 253, commands);
+    delete[] stage;
+
+  }
+  return score;
+}
+
 int main(int argc, char *argv[]) {
 
   Stage1 s1;
@@ -345,15 +445,15 @@ int main(int argc, char *argv[]) {
   printf("s2 p(%d,%d) num_enemy(%d)\n", s2.pacman.x, s2.pacman.y, s2.num_enemy);
   printf("s3 p(%d,%d) num_enemy(%d)\n", s3.pacman.x, s3.pacman.y, s3.num_enemy);
 
-  // Prints the initial state stage.
-  s2.PrintStage();
-
-  // Tests 10 steps.
-  for (int i = 0; i < 10; ++i) {
-    printf("\n");
-    s2.MoveEnemy();
-    s2.time++;
-    s2.PrintStage();
+  {
+    char commands[1000];
+    int score = Solve(1, 50, commands);
+    printf("stage 1 high score = %d\n", score);
+  }
+  {
+    char commands[1000];
+    int score = Solve(2, 300, commands);
+    printf("stage 1 high score = %d\n", score);
   }
 
   return 0;
