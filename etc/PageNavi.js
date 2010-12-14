@@ -2,7 +2,7 @@ var prevMatchers = new Array(
   new LinkHrefMacher("/prev$"),                     // goo blog
   new LinkHrefMacher("&direction=prev&"),           // mixi
   new LinkParentNodeMatcher("前の記事<br>"),        // bogus news
-  new LinkParentNodeMatcher("class=\"forwardEntry\""),
+  new LinkParentClassMatcher("forwardEntry"),
                                                     // yahoo jp blog
   new LinkInnerHTMLMacher("img src.*back.gif"),     // coco blog
   new LinkRelMatcher("prev"),                       // livedoor blog
@@ -16,7 +16,7 @@ var nextMatchers = new Array(
   new LinkHrefMacher("&direction=next&"),           // mixi
   new LinkInnerHTMLMacher("img src.*next.gif"),     // coco blog
   new LinkParentNodeMatcher("次の記事<br>"),        // bogus news
-  new LinkParentNodeMatcher("class=\"nextEntry\""), // yahoo jp blog
+  new LinkParentClassMatcher("nextEntry"),          // yahoo jp blog
   new LinkRelMatcher("next"),                       // livedoor blog
   new LinkInnerHTMLMacher("次へ &gt;&gt;"),         // rakuten blog
   new LinkClassNameMatcher("blog-pager-newer-link"),// blogger
@@ -40,6 +40,12 @@ function LinkParentNodeMatcher(pattern) {
   this.match = function(link) {
     var re = new RegExp(pattern);
     return (re.exec(link.parentNode.innerHTML) != null);
+  };
+}
+function LinkParentClassMatcher(pattern) {
+  this.match = function(link) {
+    var re = new RegExp(pattern);
+    return (re.exec(link.parentNode.className) != null);
   };
 }
 function LinkIdMatcher(pattern) {
