@@ -2,8 +2,7 @@ var prevMatchers = new Array(
   new LinkHrefMacher("/prev$"),                     // goo blog
   new LinkHrefMacher("&direction=prev&"),           // mixi
   new LinkParentNodeMatcher("前の記事<br>"),        // bogus news
-  new LinkParentClassMatcher("forwardEntry"),
-                                                    // yahoo jp blog
+  new LinkParentClassMatcher("forwardEntry"),       // yahoo jp blog
   new LinkInnerHTMLMacher("img src.*back.gif"),     // coco blog
   new LinkRelMatcher("prev"),                       // livedoor blog
   new LinkInnerHTMLMacher("&lt;&lt; 前へ"),         // rakuten blog
