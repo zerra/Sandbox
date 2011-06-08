@@ -8,6 +8,7 @@ var prevMatchers = new Array(
   new LinkInnerHTMLMacher("&lt;&lt; 前へ"),         // rakuten blog
   new LinkClassNameMatcher("blog-pager-older-link"),// blogger
   new LinkClassNameMatcher("nextPage"),             // ameba blog
+  new LinkClassNameMatcher("older_page"),           // Excite blog
   null
 )
 var nextMatchers = new Array(
@@ -20,6 +21,7 @@ var nextMatchers = new Array(
   new LinkInnerHTMLMacher("次へ &gt;&gt;"),         // rakuten blog
   new LinkClassNameMatcher("blog-pager-newer-link"),// blogger
   new LinkClassNameMatcher("previousPage"),         // ameba blog
+  new LinkClassNameMatcher("newer_page"),           // Excite blog
   null
 )
 
