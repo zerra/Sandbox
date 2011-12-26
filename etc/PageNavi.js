@@ -9,6 +9,7 @@ var prevMatchers = new Array(
   new LinkClassNameMatcher("blog-pager-older-link"),// blogger
   new LinkClassNameMatcher("nextPage"),             // ameba blog
   new LinkClassNameMatcher("older_page"),           // Excite blog
+  new LinkInnerHTMLMacher("&lt;&lt;"),              // seesaa.net
   null
 )
 var nextMatchers = new Array(
@@ -22,6 +23,7 @@ var nextMatchers = new Array(
   new LinkClassNameMatcher("blog-pager-newer-link"),// blogger
   new LinkClassNameMatcher("previousPage"),         // ameba blog
   new LinkClassNameMatcher("newer_page"),           // Excite blog
+  new LinkInnerHTMLMacher("&gt;&gt;"),              // seesaa.net
   null
 )
 
